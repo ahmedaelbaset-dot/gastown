@@ -1181,6 +1181,12 @@ func TestBuildAgentStartupCommand(t *testing.T) {
 	if newline := strings.LastIndex(agentCommand, "\n"); newline >= 0 {
 		agentCommand = agentCommand[newline+1:]
 	}
+	if runtime.GOOS != "windows" {
+		// Unix startup commands are a single "exec env KEY=VAL ... <agent> <args>" line.
+		if parts := strings.Fields(agentCommand); len(parts) >= 2 {
+			agentCommand = strings.Join(parts[len(parts)-2:], " ")
+		}
+	}
 	if !isClaudeCommand(agentCommand) || !strings.HasSuffix(strings.TrimSpace(agentCommand), "--dangerously-skip-permissions") {
 		t.Error("expected claude command in output")
 	}

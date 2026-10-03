@@ -185,11 +185,15 @@ func TestStopPollerTerminatesTrackedProcess(t *testing.T) {
 	if err := os.WriteFile(pollerPidFile(townRoot, session), []byte(strconv.Itoa(cmd.Process.Pid)), 0644); err != nil {
 		t.Fatal(err)
 	}
+	// Reap the helper as soon as it exits. It is a direct child of the test
+	// process, so without a concurrent Wait it lingers as a zombie that still
+	// answers signal 0 and StopPoller would report it as alive. Real pollers
+	// are released and reparented, so they are reaped by init.
+	done := make(chan error, 1)
+	go func() { done <- cmd.Wait() }()
 	if err := StopPoller(townRoot, session); err != nil {
 		t.Fatalf("StopPoller: %v", err)
 	}
-	done := make(chan error, 1)
-	go func() { done <- cmd.Wait() }()
 	select {
 	case <-done:
 	case <-time.After(3 * time.Second):
