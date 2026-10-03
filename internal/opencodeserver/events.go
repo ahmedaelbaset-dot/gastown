@@ -65,7 +65,7 @@ func (c *Client) Events(ctx context.Context) (*EventStream, error) {
 		return nil, fmt.Errorf("subscribing to OpenCode events: %w", err)
 	}
 	if resp.StatusCode != http.StatusOK {
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 		data, readErr := io.ReadAll(io.LimitReader(resp.Body, maxErrorBody+1))
 		cancel()
 		if readErr != nil {
@@ -82,7 +82,7 @@ func (c *Client) Events(ctx context.Context) (*EventStream, error) {
 	}
 	mediaType, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
 	if err != nil || mediaType != "text/event-stream" {
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		cancel()
 		return nil, fmt.Errorf("OpenCode GET /event returned content type %q, want text/event-stream", resp.Header.Get("Content-Type"))
 	}
@@ -117,7 +117,7 @@ func (s *EventStream) Close() error {
 func (s *EventStream) read(ctx context.Context) {
 	defer close(s.events)
 	defer close(s.errors)
-	defer s.body.Close()
+	defer func() { _ = s.body.Close() }()
 
 	scanner := bufio.NewScanner(s.body)
 	scanner.Buffer(make([]byte, 64<<10), maxEventSize+64)

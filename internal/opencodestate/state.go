@@ -192,7 +192,7 @@ func Active(ctx context.Context, townRoot, gasTownSession string) (State, bool) 
 	if err != nil {
 		return State{}, false
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
 		return State{}, false
 	}

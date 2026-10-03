@@ -295,7 +295,7 @@ func (c *Client) doJSONWithClient(ctx context.Context, httpClient *http.Client, 
 	if err != nil {
 		return fmt.Errorf("calling OpenCode %s %s: %w", method, path, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != wantStatus {
 		data, readErr := io.ReadAll(io.LimitReader(resp.Body, maxErrorBody+1))

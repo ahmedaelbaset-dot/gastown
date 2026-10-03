@@ -98,7 +98,7 @@ func RunWorker(ctx context.Context, opts WorkerOptions) (runErr error) {
 	if err != nil {
 		return fmt.Errorf("starting OpenCode nudge watcher: %w", err)
 	}
-	defer watcher.Close()
+	defer func() { _ = watcher.Close() }()
 	status, err := client.Status(ctx, session.ID)
 	if err != nil {
 		return fmt.Errorf("checking initial OpenCode status: %w", err)
@@ -121,7 +121,7 @@ func RunWorker(ctx context.Context, opts WorkerOptions) (runErr error) {
 	if err != nil {
 		return fmt.Errorf("subscribing to OpenCode lifecycle events: %w", err)
 	}
-	defer eventStream.Close()
+	defer func() { _ = eventStream.Close() }()
 
 	if strings.TrimSpace(opts.StartupPrompt) != "" {
 		if !lifecycle.BeginPrompt() {
