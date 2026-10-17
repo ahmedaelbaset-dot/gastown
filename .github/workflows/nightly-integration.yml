@@ -11,6 +11,8 @@ permissions:
 jobs:
   integration-full:
     name: Full Integration Tests
+    # Scheduled runs only on upstream; forks can still trigger manually.
+    if: ${{ github.repository == 'gastownhall/gastown' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

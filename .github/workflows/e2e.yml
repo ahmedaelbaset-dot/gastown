@@ -11,6 +11,8 @@ permissions:
 jobs:
   e2e:
     name: E2E Tests (Container)
+    # Scheduled runs only on upstream; forks can still trigger manually.
+    if: ${{ github.repository == 'gastownhall/gastown' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
