@@ -10,6 +10,8 @@ permissions: {}
 
 jobs:
   close-needs-info:
+    # Scheduled runs only on upstream; forks can still trigger manually.
+    if: ${{ github.repository == 'gastownhall/gastown' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     permissions:
       issues: write
